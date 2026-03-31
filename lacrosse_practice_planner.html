@@ -1,0 +1,1191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Youth Lacrosse Practice Planner</title>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121933;
+      --panel-2: #182143;
+      --text: #eef3ff;
+      --muted: #a8b4d6;
+      --accent: #5aa9ff;
+      --accent-2: #81f0c4;
+      --danger: #ff7b7b;
+      --line: #2a3766;
+      --good: #8ff0a4;
+      --warn: #ffd166;
+      --shadow: 0 10px 30px rgba(0,0,0,0.28);
+      --radius: 14px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, Segoe UI, Roboto, Arial, sans-serif;
+      background: linear-gradient(180deg, #08101d 0%, #101938 100%);
+      color: var(--text);
+    }
+    .app {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      min-height: 100vh;
+    }
+    .sidebar {
+      border-right: 1px solid var(--line);
+      background: rgba(8, 12, 24, 0.75);
+      backdrop-filter: blur(8px);
+      padding: 18px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow: auto;
+    }
+    .main {
+      padding: 18px;
+      overflow: auto;
+    }
+    h1, h2, h3 { margin: 0 0 10px; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.1rem; color: var(--accent-2); }
+    h3 { font-size: 0.95rem; color: var(--accent); }
+    .muted { color: var(--muted); }
+    .small { font-size: 0.86rem; }
+    .panel {
+      background: linear-gradient(180deg, rgba(22,31,64,0.95), rgba(16,23,49,0.95));
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .grid { display: grid; gap: 12px; }
+    .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    label {
+      display: block;
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    input, select, textarea, button {
+      font: inherit;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #32457c;
+      background: #0d1530;
+      color: var(--text);
+      outline: none;
+    }
+    textarea { min-height: 72px; resize: vertical; }
+    button {
+      border: 1px solid #4262b3;
+      background: linear-gradient(180deg, #1d4fa0, #17366c);
+      color: white;
+      border-radius: 10px;
+      padding: 10px 12px;
+      cursor: pointer;
+      transition: 0.15s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    button.secondary {
+      background: linear-gradient(180deg, #273258, #1a233f);
+      border-color: #41507f;
+    }
+    button.ghost {
+      background: transparent;
+      border-color: #516399;
+    }
+    button.danger {
+      background: linear-gradient(180deg, #bb4141, #7f2424);
+      border-color: #d86666;
+    }
+    button.good {
+      background: linear-gradient(180deg, #147f61, #105745);
+      border-color: #31ad88;
+    }
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .practice-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .practice-item {
+      background: rgba(11, 19, 43, 0.9);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      cursor: pointer;
+    }
+    .practice-item:hover { border-color: #5c79d7; }
+    .practice-item .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+    }
+    .cards {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .block-card {
+      background: rgba(9, 16, 35, 0.9);
+      border: 1px solid #2d3b6a;
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .block-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      background: rgba(90,169,255,0.14);
+      border: 1px solid rgba(90,169,255,0.35);
+      color: #dbe9ff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th { color: var(--accent-2); font-weight: 600; }
+    .summary-bar {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat {
+      background: rgba(11, 17, 35, 0.88);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .stat .value {
+      font-size: 1.35rem;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .toolbar select, .toolbar input[type="color"], .toolbar input[type="number"] {
+      width: auto;
+    }
+    .toolbar .tool-btn.active {
+      outline: 2px solid var(--accent-2);
+      border-color: var(--accent-2);
+    }
+    .canvas-wrap {
+      background: #0b132c;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+    }
+    canvas {
+      width: 100%;
+      max-width: 100%;
+      background: #f9fbff;
+      border-radius: 10px;
+      display: block;
+      margin: 0 auto;
+      cursor: crosshair;
+      touch-action: none;
+    }
+    .footer-note { margin-top: 8px; color: var(--muted); font-size: 0.82rem; }
+    .right-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    .inline { display:flex; gap:8px; align-items:center; flex-wrap: wrap; }
+    @media (max-width: 1080px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar { position: relative; height: auto; border-right: none; border-bottom: 1px solid var(--line); }
+      .summary-bar, .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    }
+    @media print {
+      .sidebar, .toolbar, .right-actions, .block-actions, .no-print { display: none !important; }
+      body { background: white; color: black; }
+      .app { display: block; }
+      .panel, .block-card, .canvas-wrap, .stat { box-shadow: none; background: white; color: black; border-color: #ccc; }
+      canvas { border: 1px solid #999; }
+      th, td { border-color: #ccc; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="panel">
+        <h1>Youth Lacrosse Practice Planner</h1>
+        <div class="muted small">Single-file, plug-and-play planner with practice templates, drill blocks, sketching, date-based logging, and local history saved in your browser.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Practice Actions</h2>
+        <div class="button-row" style="margin-top:10px;">
+          <button id="newPracticeBtn">New Practice</button>
+          <button class="secondary" id="savePracticeBtn">Save Practice</button>
+          <button class="secondary" id="duplicatePracticeBtn">Duplicate</button>
+          <button class="ghost" id="printBtn">Print</button>
+          <button class="good" id="exportBtn">Export JSON</button>
+          <button class="ghost" id="exportPngBtn">Export Sketch PNG</button>
+          <button class="ghost" id="importBtn">Import JSON</button>
+          <input id="importFile" type="file" accept="application/json" style="display:none;" />
+        </div>
+        <div class="footer-note">Data is stored locally in your browser using localStorage.</div>
+      </div>
+
+      <div class="panel">
+        <h2>Saved Practices</h2>
+        <div class="inline" style="margin:10px 0;">
+          <input id="searchPractices" type="text" placeholder="Search saved practices" />
+        </div>
+        <div id="practiceList" class="practice-list"></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <section class="panel">
+        <div class="grid grid-4">
+          <div>
+            <label for="practiceTitle">Practice Title</label>
+            <input id="practiceTitle" placeholder="Example: U10 Passing and Ground Balls" />
+          </div>
+          <div>
+            <label for="practiceDate">Date</label>
+            <input id="practiceDate" type="date" />
+          </div>
+          <div>
+            <label for="teamName">Team / Group</label>
+            <input id="teamName" placeholder="Example: 5th Grade Boys" />
+          </div>
+          <div>
+            <label for="practiceLength">Target Length (min)</label>
+            <input id="practiceLength" type="number" min="0" step="1" value="90" />
+          </div>
+        </div>
+        <div class="grid grid-2" style="margin-top:12px;">
+          <div>
+            <label for="practiceGoals">Practice Goals</label>
+            <textarea id="practiceGoals" placeholder="Example: improve catching under pressure, ground ball technique, 2v1 decision making"></textarea>
+          </div>
+          <div>
+            <label for="coachNotes">Coach Notes</label>
+            <textarea id="coachNotes" placeholder="Roster notes, attendance, emphasis, behavior reminders, field constraints, weather, etc."></textarea>
+          </div>
+        </div>
+      </section>
+
+      <section class="summary-bar">
+        <div class="stat"><div class="small muted">Total Planned</div><div id="totalPlanned" class="value">0 min</div></div>
+        <div class="stat"><div class="small muted">Skill Blocks</div><div id="skillCount" class="value">0</div></div>
+        <div class="stat"><div class="small muted">Water Breaks</div><div id="waterCount" class="value">0</div></div>
+        <div class="stat"><div class="small muted">Gap vs Target</div><div id="gapToTarget" class="value">0 min</div></div>
+      </section>
+
+      <section class="panel no-print">
+        <div class="block-header">
+          <div>
+            <h2>Add Practice Block</h2>
+            <div class="small muted">Use this for warmups, stickwork, individual skills, small-group drills, team concepts, conditioning, water breaks, or custom segments.</div>
+          </div>
+        </div>
+        <div class="grid grid-4">
+          <div>
+            <label for="blockType">Block Type</label>
+            <select id="blockType">
+              <option value="Warmup">Warmup</option>
+              <option value="Individual Skill">Individual Skill</option>
+              <option value="Small Group">Small Group</option>
+              <option value="Team Drill">Team Drill</option>
+              <option value="Conditioning">Conditioning</option>
+              <option value="Water Break">Water Break</option>
+              <option value="Scrimmage">Scrimmage</option>
+              <option value="Cool Down">Cool Down</option>
+              <option value="Custom">Custom</option>
+            </select>
+          </div>
+          <div>
+            <label for="blockName">Name</label>
+            <input id="blockName" placeholder="Example: 3-line passing" />
+          </div>
+          <div>
+            <label for="blockDuration">Duration (min)</label>
+            <input id="blockDuration" type="number" min="1" step="1" value="10" />
+          </div>
+          <div>
+            <label for="blockFocus">Focus</label>
+            <input id="blockFocus" placeholder="Example: hand positioning, quick feet" />
+          </div>
+        </div>
+        <div class="grid grid-3" style="margin-top:12px;">
+          <div>
+            <label for="blockPlayers">Players / Setup</label>
+            <input id="blockPlayers" placeholder="Example: whole team, 3 groups of 4" />
+          </div>
+          <div>
+            <label for="blockEquipment">Equipment</label>
+            <input id="blockEquipment" placeholder="Example: 12 cones, 8 balls, 2 goals" />
+          </div>
+          <div>
+            <label for="blockIntensity">Intensity</label>
+            <select id="blockIntensity">
+              <option>Low</option>
+              <option selected>Medium</option>
+              <option>High</option>
+            </select>
+          </div>
+        </div>
+        <div class="grid" style="margin-top:12px;">
+          <div>
+            <label for="blockNotes">Coaching Points / Notes</label>
+            <textarea id="blockNotes" placeholder="Key cues, progression, constraints, reps, scoring, corrections, reminders."></textarea>
+          </div>
+        </div>
+        <div class="button-row" style="margin-top:12px;">
+          <button id="addBlockBtn">Add Block</button>
+          <button class="ghost" id="addTemplateBtn">Load Common Practice Template</button>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="block-header">
+          <div>
+            <h2>Practice Timeline</h2>
+            <div class="small muted">Drag by editing order numbers if you want to re-sequence blocks.</div>
+          </div>
+          <div class="right-actions no-print">
+            <button class="ghost" id="clearBlocksBtn">Clear All Blocks</button>
+          </div>
+        </div>
+        <div id="blocksContainer" class="cards"></div>
+      </section>
+
+      <section class="panel">
+        <div class="block-header">
+          <div>
+            <h2>Timeline Summary</h2>
+            <div class="small muted">Auto-calculated running plan.</div>
+          </div>
+        </div>
+        <div style="overflow:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Type</th>
+                <th>Block</th>
+                <th>Duration</th>
+                <th>Running Total</th>
+                <th>Focus</th>
+                <th>Equipment</th>
+              </tr>
+            </thead>
+            <tbody id="summaryTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="block-header">
+          <div>
+            <h2>Sketch Tool</h2>
+            <div class="small muted">Draw drills and field setups. Tools include cones, players, ball, goals, lines, arrows, dashed paths, circles, boxes, text, and freehand marks.</div>
+          </div>
+        </div>
+
+        <div class="toolbar no-print">
+          <button class="tool-btn secondary" data-tool="select">Select</button>
+          <button class="tool-btn secondary" data-tool="freehand">Freehand</button>
+          <button class="tool-btn secondary" data-tool="line">Line</button>
+          <button class="tool-btn secondary" data-tool="arrow">Arrow</button>
+          <button class="tool-btn secondary" data-tool="dashed">Dashed</button>
+          <button class="tool-btn secondary" data-tool="rect">Box</button>
+          <button class="tool-btn secondary" data-tool="circle">Circle</button>
+          <button class="tool-btn secondary" data-tool="text">Text</button>
+          <button class="tool-btn secondary" data-tool="cone">Cone</button>
+          <button class="tool-btn secondary" data-tool="goal">Goal</button>
+          <button class="tool-btn secondary" data-tool="offense">O</button>
+          <button class="tool-btn secondary" data-tool="defense">X</button>
+          <button class="tool-btn secondary" data-tool="ball">Ball</button>
+          <button class="tool-btn secondary" data-tool="eraser">Eraser</button>
+          <label>Color</label><input id="drawColor" type="color" value="#1f3f92" />
+          <label>Width</label><input id="drawWidth" type="number" min="1" max="12" value="3" />
+          <label>Background</label>
+          <select id="canvasBgMode">
+            <option value="half">Half Field</option>
+            <option value="full">Full Field</option>
+            <option value="blank">Blank</option>
+          </select>
+          <button class="ghost" id="undoBtn">Undo</button>
+          <button class="ghost" id="clearCanvasBtn">Clear Sketch</button>
+        </div>
+
+        <div class="canvas-wrap">
+          <canvas id="sketchCanvas" width="1200" height="700"></canvas>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'lacrossePracticePlannerV1';
+    const state = {
+      currentId: null,
+      practices: [],
+      blocks: [],
+      drawing: {
+        tool: 'line',
+        color: '#1f3f92',
+        width: 3,
+        bgMode: 'half',
+        objects: [],
+        startX: 0,
+        startY: 0,
+        currentPath: null,
+        isDown: false,
+      }
+    };
+
+    const els = {
+      practiceTitle: document.getElementById('practiceTitle'),
+      practiceDate: document.getElementById('practiceDate'),
+      teamName: document.getElementById('teamName'),
+      practiceLength: document.getElementById('practiceLength'),
+      practiceGoals: document.getElementById('practiceGoals'),
+      coachNotes: document.getElementById('coachNotes'),
+      blockType: document.getElementById('blockType'),
+      blockName: document.getElementById('blockName'),
+      blockDuration: document.getElementById('blockDuration'),
+      blockFocus: document.getElementById('blockFocus'),
+      blockPlayers: document.getElementById('blockPlayers'),
+      blockEquipment: document.getElementById('blockEquipment'),
+      blockIntensity: document.getElementById('blockIntensity'),
+      blockNotes: document.getElementById('blockNotes'),
+      addBlockBtn: document.getElementById('addBlockBtn'),
+      addTemplateBtn: document.getElementById('addTemplateBtn'),
+      blocksContainer: document.getElementById('blocksContainer'),
+      summaryTableBody: document.getElementById('summaryTableBody'),
+      totalPlanned: document.getElementById('totalPlanned'),
+      skillCount: document.getElementById('skillCount'),
+      waterCount: document.getElementById('waterCount'),
+      gapToTarget: document.getElementById('gapToTarget'),
+      practiceList: document.getElementById('practiceList'),
+      searchPractices: document.getElementById('searchPractices'),
+      newPracticeBtn: document.getElementById('newPracticeBtn'),
+      savePracticeBtn: document.getElementById('savePracticeBtn'),
+      duplicatePracticeBtn: document.getElementById('duplicatePracticeBtn'),
+      printBtn: document.getElementById('printBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      exportPngBtn: document.getElementById('exportPngBtn'),
+      importBtn: document.getElementById('importBtn'),
+      importFile: document.getElementById('importFile'),
+      clearBlocksBtn: document.getElementById('clearBlocksBtn'),
+      drawColor: document.getElementById('drawColor'),
+      drawWidth: document.getElementById('drawWidth'),
+      canvasBgMode: document.getElementById('canvasBgMode'),
+      undoBtn: document.getElementById('undoBtn'),
+      clearCanvasBtn: document.getElementById('clearCanvasBtn'),
+      canvas: document.getElementById('sketchCanvas')
+    };
+
+    const ctx = els.canvas.getContext('2d');
+
+    function uid() {
+      return 'p_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function todayString() {
+      const d = new Date();
+      const yyyy = d.getFullYear();
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      return `${yyyy}-${mm}-${dd}`;
+    }
+
+    function escapeHtml(str='') {
+      return str
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function saveStore() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state.practices));
+    }
+
+    function loadStore() {
+      try {
+        state.practices = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      } catch {
+        state.practices = [];
+      }
+      renderPracticeList();
+    }
+
+    function getCurrentPracticeData() {
+      return {
+        id: state.currentId || uid(),
+        title: els.practiceTitle.value.trim() || 'Untitled Practice',
+        date: els.practiceDate.value || todayString(),
+        team: els.teamName.value.trim(),
+        targetLength: Number(els.practiceLength.value || 0),
+        goals: els.practiceGoals.value,
+        coachNotes: els.coachNotes.value,
+        blocks: state.blocks,
+        sketch: {
+          bgMode: state.drawing.bgMode,
+          objects: state.drawing.objects
+        },
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function loadPractice(practice) {
+      state.currentId = practice.id;
+      els.practiceTitle.value = practice.title || '';
+      els.practiceDate.value = practice.date || todayString();
+      els.teamName.value = practice.team || '';
+      els.practiceLength.value = practice.targetLength || 90;
+      els.practiceGoals.value = practice.goals || '';
+      els.coachNotes.value = practice.coachNotes || '';
+      state.blocks = structuredClone(practice.blocks || []);
+      state.drawing.bgMode = practice.sketch?.bgMode || 'half';
+      state.drawing.objects = structuredClone(practice.sketch?.objects || []);
+      els.canvasBgMode.value = state.drawing.bgMode;
+      renderBlocks();
+      renderSummary();
+      redrawCanvas();
+    }
+
+    function newPractice() {
+      state.currentId = null;
+      els.practiceTitle.value = '';
+      els.practiceDate.value = todayString();
+      els.teamName.value = '';
+      els.practiceLength.value = 90;
+      els.practiceGoals.value = '';
+      els.coachNotes.value = '';
+      state.blocks = [];
+      state.drawing.bgMode = 'half';
+      state.drawing.objects = [];
+      els.canvasBgMode.value = 'half';
+      renderBlocks();
+      renderSummary();
+      redrawCanvas();
+    }
+
+    function savePractice() {
+      const data = getCurrentPracticeData();
+      state.currentId = data.id;
+      const idx = state.practices.findIndex(p => p.id === data.id);
+      if (idx >= 0) state.practices[idx] = data;
+      else state.practices.unshift(data);
+      state.practices.sort((a, b) => (b.date || '').localeCompare(a.date || '') || (b.updatedAt || '').localeCompare(a.updatedAt || ''));
+      saveStore();
+      renderPracticeList();
+      alert('Practice saved.');
+    }
+
+    function duplicatePractice() {
+      const data = getCurrentPracticeData();
+      data.id = uid();
+      data.title = `${data.title} (Copy)`;
+      data.updatedAt = new Date().toISOString();
+      state.practices.unshift(data);
+      saveStore();
+      renderPracticeList();
+      loadPractice(data);
+      alert('Practice duplicated.');
+    }
+
+    function deletePractice(id) {
+      const practice = state.practices.find(p => p.id === id);
+      if (!practice) return;
+      if (!confirm(`Delete practice "${practice.title}"?`)) return;
+      state.practices = state.practices.filter(p => p.id !== id);
+      saveStore();
+      renderPracticeList();
+      if (state.currentId === id) newPractice();
+    }
+
+    function renderPracticeList() {
+      const q = els.searchPractices.value.trim().toLowerCase();
+      const list = state.practices.filter(p => {
+        const hay = `${p.title} ${p.team} ${p.date} ${p.goals}`.toLowerCase();
+        return !q || hay.includes(q);
+      });
+      if (!list.length) {
+        els.practiceList.innerHTML = '<div class="muted small">No saved practices yet.</div>';
+        return;
+      }
+      els.practiceList.innerHTML = list.map(p => `
+        <div class="practice-item">
+          <div class="row" onclick="window.__loadPractice('${p.id}')">
+            <div>
+              <div><strong>${escapeHtml(p.title || 'Untitled Practice')}</strong></div>
+              <div class="small muted">${escapeHtml(p.date || '')} • ${escapeHtml(p.team || 'No team')}</div>
+              <div class="small muted">${(p.blocks || []).length} blocks • ${(p.targetLength || 0)} min target</div>
+            </div>
+            <div><span class="badge">Open</span></div>
+          </div>
+          <div class="button-row" style="margin-top:10px;">
+            <button class="ghost" onclick="window.__loadPractice('${p.id}')">Load</button>
+            <button class="danger" onclick="window.__deletePractice('${p.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.__loadPractice = function(id) {
+      const practice = state.practices.find(p => p.id === id);
+      if (practice) loadPractice(practice);
+    };
+    window.__deletePractice = deletePractice;
+
+    function readBlockForm() {
+      return {
+        id: uid(),
+        type: els.blockType.value,
+        name: els.blockName.value.trim() || els.blockType.value,
+        duration: Number(els.blockDuration.value || 0),
+        focus: els.blockFocus.value.trim(),
+        players: els.blockPlayers.value.trim(),
+        equipment: els.blockEquipment.value.trim(),
+        intensity: els.blockIntensity.value,
+        notes: els.blockNotes.value.trim()
+      };
+    }
+
+    function clearBlockForm() {
+      els.blockType.value = 'Warmup';
+      els.blockName.value = '';
+      els.blockDuration.value = 10;
+      els.blockFocus.value = '';
+      els.blockPlayers.value = '';
+      els.blockEquipment.value = '';
+      els.blockIntensity.value = 'Medium';
+      els.blockNotes.value = '';
+    }
+
+    function addBlock(block = null) {
+      const b = block || readBlockForm();
+      if (!b.duration || b.duration < 1) {
+        alert('Duration must be at least 1 minute.');
+        return;
+      }
+      state.blocks.push(b);
+      renderBlocks();
+      renderSummary();
+      if (!block) clearBlockForm();
+    }
+
+    function removeBlock(id) {
+      state.blocks = state.blocks.filter(b => b.id !== id);
+      renderBlocks();
+      renderSummary();
+    }
+
+    function moveBlock(id, direction) {
+      const idx = state.blocks.findIndex(b => b.id === id);
+      if (idx < 0) return;
+      const newIdx = idx + direction;
+      if (newIdx < 0 || newIdx >= state.blocks.length) return;
+      const [item] = state.blocks.splice(idx, 1);
+      state.blocks.splice(newIdx, 0, item);
+      renderBlocks();
+      renderSummary();
+    }
+
+    function renderBlocks() {
+      if (!state.blocks.length) {
+        els.blocksContainer.innerHTML = '<div class="muted">No practice blocks yet.</div>';
+        return;
+      }
+      els.blocksContainer.innerHTML = state.blocks.map((b, i) => `
+        <div class="block-card">
+          <div class="block-header">
+            <div>
+              <div class="badge">${escapeHtml(b.type)}</div>
+              <h3 style="margin-top:8px;">${i + 1}. ${escapeHtml(b.name)}</h3>
+              <div class="small muted">${escapeHtml(b.duration.toString())} min • ${escapeHtml(b.intensity || '')} intensity ${b.players ? '• ' + escapeHtml(b.players) : ''}</div>
+            </div>
+            <div class="button-row block-actions no-print">
+              <button class="ghost" onclick="window.__moveBlock('${b.id}', -1)">↑</button>
+              <button class="ghost" onclick="window.__moveBlock('${b.id}', 1)">↓</button>
+              <button class="danger" onclick="window.__removeBlock('${b.id}')">Remove</button>
+            </div>
+          </div>
+          <div class="grid grid-2">
+            <div><strong>Focus:</strong> <span class="muted">${escapeHtml(b.focus || '-')}</span></div>
+            <div><strong>Equipment:</strong> <span class="muted">${escapeHtml(b.equipment || '-')}</span></div>
+            <div><strong>Players/Setup:</strong> <span class="muted">${escapeHtml(b.players || '-')}</span></div>
+            <div><strong>Coaching Notes:</strong> <span class="muted">${escapeHtml(b.notes || '-')}</span></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    window.__removeBlock = removeBlock;
+    window.__moveBlock = moveBlock;
+
+    function renderSummary() {
+      let total = 0;
+      let skills = 0;
+      let waters = 0;
+      let rows = '';
+      state.blocks.forEach((b, i) => {
+        total += Number(b.duration || 0);
+        if (['Individual Skill', 'Small Group', 'Team Drill'].includes(b.type)) skills += 1;
+        if (b.type === 'Water Break') waters += 1;
+        rows += `
+          <tr>
+            <td>${i + 1}</td>
+            <td>${escapeHtml(b.type)}</td>
+            <td>${escapeHtml(b.name)}</td>
+            <td>${escapeHtml(String(b.duration))} min</td>
+            <td>${total} min</td>
+            <td>${escapeHtml(b.focus || '-')}</td>
+            <td>${escapeHtml(b.equipment || '-')}</td>
+          </tr>
+        `;
+      });
+      els.summaryTableBody.innerHTML = rows || '<tr><td colspan="7" class="muted">No blocks added.</td></tr>';
+      els.totalPlanned.textContent = `${total} min`;
+      els.skillCount.textContent = String(skills);
+      els.waterCount.textContent = String(waters);
+      const target = Number(els.practiceLength.value || 0);
+      const gap = total - target;
+      els.gapToTarget.textContent = `${gap >= 0 ? '+' : ''}${gap} min`;
+    }
+
+    function addTemplateBlocks() {
+      const template = [
+        { type: 'Warmup', name: 'Dynamic Warmup and Stick Activation', duration: 10, focus: 'movement prep and soft hands', players: 'whole team', equipment: 'cones, balls', intensity: 'Low', notes: 'Jog, shuffle, backpedal, wrist rolls, quick stick.' },
+        { type: 'Individual Skill', name: 'Ground Ball Technique', duration: 12, focus: 'butt down, scoop through, protect stick', players: 'pairs', equipment: 'balls, cones', intensity: 'Medium', notes: 'Add light pressure after first few reps.' },
+        { type: 'Individual Skill', name: 'Passing and Catching on the Move', duration: 12, focus: 'lead pass, catch to space', players: '3 lines', equipment: 'balls, cones', intensity: 'Medium', notes: 'Both hands where appropriate.' },
+        { type: 'Water Break', name: 'Water', duration: 3, focus: 'recover and reset', players: 'whole team', equipment: '-', intensity: 'Low', notes: 'Quick teaching reminder before next block.' },
+        { type: 'Small Group', name: '2v1 Decision Drill', duration: 15, focus: 'draw defender and move ball', players: 'small groups', equipment: 'cones, goals, balls', intensity: 'High', notes: 'Progress to trailing defender.' },
+        { type: 'Team Drill', name: 'Clearing / Riding Concept', duration: 15, focus: 'spacing and communication', players: 'half field units', equipment: 'cones, balls, goals', intensity: 'Medium', notes: 'Freeze and correct spacing.' },
+        { type: 'Water Break', name: 'Water', duration: 3, focus: 'recover and reset', players: 'whole team', equipment: '-', intensity: 'Low', notes: 'Keep it short.' },
+        { type: 'Scrimmage', name: 'Controlled Scrimmage', duration: 15, focus: 'transfer practice to play', players: 'whole team', equipment: 'pinnies, goals, balls', intensity: 'High', notes: 'Start each rep with a specific constraint or point of emphasis.' },
+        { type: 'Cool Down', name: 'Review and Team Wrap-Up', duration: 5, focus: 'reinforce takeaways', players: 'whole team', equipment: '-', intensity: 'Low', notes: 'Highlight effort, learning point, next practice goal.' }
+      ];
+      template.forEach(t => addBlock({ ...t, id: uid() }));
+    }
+
+    function pointFromEvent(e) {
+      const rect = els.canvas.getBoundingClientRect();
+      const scaleX = els.canvas.width / rect.width;
+      const scaleY = els.canvas.height / rect.height;
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
+    }
+
+    function setActiveTool(tool) {
+      state.drawing.tool = tool;
+      document.querySelectorAll('.tool-btn').forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+    }
+
+    function drawFieldBackground() {
+      const w = els.canvas.width;
+      const h = els.canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, w, h);
+
+      if (state.drawing.bgMode === 'blank') return;
+
+      ctx.save();
+      ctx.strokeStyle = '#b6c3df';
+      ctx.lineWidth = 3;
+      ctx.fillStyle = '#eef5ff';
+      ctx.fillRect(20, 20, w - 40, h - 40);
+      ctx.strokeRect(20, 20, w - 40, h - 40);
+
+      if (state.drawing.bgMode === 'full') {
+        ctx.beginPath();
+        ctx.moveTo(w / 2, 20); ctx.lineTo(w / 2, h - 20);
+        ctx.stroke();
+      }
+
+      const centerY = h / 2;
+      const goalLeftX = state.drawing.bgMode === 'full' ? 150 : 220;
+      const goalRightX = w - goalLeftX;
+      [goalLeftX, goalRightX].forEach((gx, idx) => {
+        if (state.drawing.bgMode === 'half' && idx === 1) return;
+        ctx.beginPath();
+        ctx.arc(gx, centerY, 70, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(gx, centerY, 18, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeRect(gx - 12, centerY - 10, 24, 20);
+      });
+
+      ctx.setLineDash([12, 10]);
+      if (state.drawing.bgMode === 'half') {
+        ctx.beginPath();
+        ctx.arc(goalLeftX, centerY, 130, -Math.PI/2, Math.PI/2);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(goalLeftX, centerY, 130, -Math.PI/2, Math.PI/2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(goalRightX, centerY, 130, Math.PI/2, -Math.PI/2);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+
+    function drawArrowHead(x1, y1, x2, y2, color, width) {
+      const angle = Math.atan2(y2 - y1, x2 - x1);
+      const size = 10 + width * 1.8;
+      ctx.fillStyle = color;
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - size * Math.cos(angle - Math.PI / 6), y2 - size * Math.sin(angle - Math.PI / 6));
+      ctx.lineTo(x2 - size * Math.cos(angle + Math.PI / 6), y2 - size * Math.sin(angle + Math.PI / 6));
+      ctx.closePath();
+      ctx.fill();
+    }
+
+    function drawObject(obj) {
+      ctx.save();
+      ctx.strokeStyle = obj.color || '#1f3f92';
+      ctx.fillStyle = obj.color || '#1f3f92';
+      ctx.lineWidth = obj.width || 3;
+      if (obj.type === 'freehand') {
+        const pts = obj.points || [];
+        if (pts.length < 2) return;
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+        ctx.stroke();
+      } else if (['line', 'arrow', 'dashed'].includes(obj.type)) {
+        if (obj.type === 'dashed') ctx.setLineDash([10, 8]);
+        ctx.beginPath();
+        ctx.moveTo(obj.x1, obj.y1);
+        ctx.lineTo(obj.x2, obj.y2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        if (obj.type === 'arrow') drawArrowHead(obj.x1, obj.y1, obj.x2, obj.y2, obj.color, obj.width || 3);
+      } else if (obj.type === 'rect') {
+        ctx.strokeRect(obj.x, obj.y, obj.w, obj.h);
+      } else if (obj.type === 'circle') {
+        ctx.beginPath();
+        ctx.ellipse(obj.cx, obj.cy, Math.abs(obj.rx), Math.abs(obj.ry), 0, 0, Math.PI * 2);
+        ctx.stroke();
+      } else if (obj.type === 'text') {
+        ctx.font = `${Math.max(16, (obj.width || 3) * 6)}px Arial`;
+        ctx.fillText(obj.text || 'Text', obj.x, obj.y);
+      } else if (obj.type === 'cone') {
+        ctx.beginPath();
+        ctx.moveTo(obj.x, obj.y - 18);
+        ctx.lineTo(obj.x - 14, obj.y + 16);
+        ctx.lineTo(obj.x + 14, obj.y + 16);
+        ctx.closePath();
+        ctx.fillStyle = '#ff9800';
+        ctx.fill();
+        ctx.strokeStyle = '#c66a00';
+        ctx.stroke();
+      } else if (obj.type === 'goal') {
+        ctx.strokeRect(obj.x - 20, obj.y - 14, 40, 28);
+        ctx.beginPath();
+        ctx.moveTo(obj.x - 20, obj.y - 14);
+        ctx.lineTo(obj.x - 28, obj.y - 22);
+        ctx.lineTo(obj.x + 12, obj.y - 22);
+        ctx.lineTo(obj.x + 20, obj.y - 14);
+        ctx.stroke();
+      } else if (obj.type === 'offense' || obj.type === 'defense') {
+        ctx.font = 'bold 26px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = obj.type === 'offense' ? '#1474cc' : '#d12c2c';
+        ctx.fillText(obj.type === 'offense' ? 'O' : 'X', obj.x, obj.y);
+      } else if (obj.type === 'ball') {
+        ctx.beginPath();
+        ctx.arc(obj.x, obj.y, 7, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffcd38';
+        ctx.fill();
+        ctx.strokeStyle = '#9a7b08';
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function redrawCanvas(preview = null) {
+      drawFieldBackground();
+      state.drawing.objects.forEach(drawObject);
+      if (preview) drawObject(preview);
+    }
+
+    function pushObject(obj) {
+      state.drawing.objects.push(obj);
+      redrawCanvas();
+    }
+
+    function hitTest(x, y) {
+      for (let i = state.drawing.objects.length - 1; i >= 0; i--) {
+        const obj = state.drawing.objects[i];
+        if (obj.type === 'cone' || obj.type === 'goal' || obj.type === 'offense' || obj.type === 'defense' || obj.type === 'ball') {
+          const ox = obj.x, oy = obj.y;
+          if (Math.hypot(x - ox, y - oy) < 24) return i;
+        } else if (obj.type === 'text') {
+          if (Math.abs(x - obj.x) < 60 && Math.abs(y - obj.y) < 20) return i;
+        } else if (obj.type === 'rect') {
+          if (x >= Math.min(obj.x, obj.x + obj.w) && x <= Math.max(obj.x, obj.x + obj.w) && y >= Math.min(obj.y, obj.y + obj.h) && y <= Math.max(obj.y, obj.y + obj.h)) return i;
+        } else if (obj.type === 'circle') {
+          const norm = ((x - obj.cx) ** 2) / ((Math.abs(obj.rx) || 1) ** 2) + ((y - obj.cy) ** 2) / ((Math.abs(obj.ry) || 1) ** 2);
+          if (norm <= 1.2) return i;
+        } else if (['line', 'arrow', 'dashed'].includes(obj.type)) {
+          const d = distanceToSegment(x, y, obj.x1, obj.y1, obj.x2, obj.y2);
+          if (d < 10) return i;
+        } else if (obj.type === 'freehand') {
+          const pts = obj.points || [];
+          for (let p = 1; p < pts.length; p++) {
+            if (distanceToSegment(x, y, pts[p-1].x, pts[p-1].y, pts[p].x, pts[p].y) < 8) return i;
+          }
+        }
+      }
+      return -1;
+    }
+
+    function distanceToSegment(px, py, x1, y1, x2, y2) {
+      const dx = x2 - x1, dy = y2 - y1;
+      const lenSq = dx * dx + dy * dy;
+      if (!lenSq) return Math.hypot(px - x1, py - y1);
+      let t = ((px - x1) * dx + (py - y1) * dy) / lenSq;
+      t = Math.max(0, Math.min(1, t));
+      const projX = x1 + t * dx;
+      const projY = y1 + t * dy;
+      return Math.hypot(px - projX, py - projY);
+    }
+
+    function onCanvasDown(e) {
+      e.preventDefault();
+      const p = pointFromEvent(e);
+      const d = state.drawing;
+      d.startX = p.x; d.startY = p.y; d.isDown = true;
+
+      if (d.tool === 'eraser') {
+        const idx = hitTest(p.x, p.y);
+        if (idx >= 0) {
+          d.objects.splice(idx, 1);
+          redrawCanvas();
+        }
+        d.isDown = false;
+        return;
+      }
+
+      if (d.tool === 'select') {
+        const idx = hitTest(p.x, p.y);
+        if (idx >= 0) {
+          d.selectedIndex = idx;
+          d.dragOffsetX = p.x;
+          d.dragOffsetY = p.y;
+        } else {
+          d.selectedIndex = null;
+        }
+        return;
+      }
+
+      if (d.tool === 'freehand') {
+        d.currentPath = { type: 'freehand', color: d.color, width: d.width, points: [{ x: p.x, y: p.y }] };
+      } else if (['cone', 'goal', 'offense', 'defense', 'ball'].includes(d.tool)) {
+        pushObject({ type: d.tool, x: p.x, y: p.y, color: d.color, width: d.width });
+        d.isDown = false;
+      } else if (d.tool === 'text') {
+        const text = prompt('Enter label text:', 'Drill');
+        if (text) pushObject({ type: 'text', x: p.x, y: p.y, text, color: d.color, width: d.width });
+        d.isDown = false;
+      }
+    }
+
+    function onCanvasMove(e) {
+      const d = state.drawing;
+      if (!d.isDown) return;
+      const p = pointFromEvent(e);
+
+      if (d.tool === 'select' && Number.isInteger(d.selectedIndex)) {
+        const obj = d.objects[d.selectedIndex];
+        const dx = p.x - d.dragOffsetX;
+        const dy = p.y - d.dragOffsetY;
+        d.dragOffsetX = p.x;
+        d.dragOffsetY = p.y;
+        ['x','x1','x2','cx'].forEach(k => { if (obj[k] != null) obj[k] += dx; });
+        ['y','y1','y2','cy'].forEach(k => { if (obj[k] != null) obj[k] += dy; });
+        if (obj.points) obj.points.forEach(pt => { pt.x += dx; pt.y += dy; });
+        redrawCanvas();
+        return;
+      }
+
+      if (d.tool === 'freehand' && d.currentPath) {
+        d.currentPath.points.push({ x: p.x, y: p.y });
+        redrawCanvas(d.currentPath);
+        return;
+      }
+
+      let preview = null;
+      if (['line', 'arrow', 'dashed'].includes(d.tool)) {
+        preview = { type: d.tool, x1: d.startX, y1: d.startY, x2: p.x, y2: p.y, color: d.color, width: d.width };
+      } else if (d.tool === 'rect') {
+        preview = { type: 'rect', x: d.startX, y: d.startY, w: p.x - d.startX, h: p.y - d.startY, color: d.color, width: d.width };
+      } else if (d.tool === 'circle') {
+        preview = { type: 'circle', cx: (d.startX + p.x) / 2, cy: (d.startY + p.y) / 2, rx: (p.x - d.startX) / 2, ry: (p.y - d.startY) / 2, color: d.color, width: d.width };
+      }
+      redrawCanvas(preview);
+    }
+
+    function onCanvasUp(e) {
+      const d = state.drawing;
+      if (!d.isDown) return;
+      const p = pointFromEvent(e.changedTouches ? { touches: e.changedTouches } : e);
+
+      if (d.tool === 'freehand' && d.currentPath) {
+        pushObject(d.currentPath);
+        d.currentPath = null;
+      } else if (['line', 'arrow', 'dashed'].includes(d.tool)) {
+        pushObject({ type: d.tool, x1: d.startX, y1: d.startY, x2: p.x, y2: p.y, color: d.color, width: d.width });
+      } else if (d.tool === 'rect') {
+        pushObject({ type: 'rect', x: d.startX, y: d.startY, w: p.x - d.startX, h: p.y - d.startY, color: d.color, width: d.width });
+      } else if (d.tool === 'circle') {
+        pushObject({ type: 'circle', cx: (d.startX + p.x) / 2, cy: (d.startY + p.y) / 2, rx: (p.x - d.startX) / 2, ry: (p.y - d.startY) / 2, color: d.color, width: d.width });
+      }
+      d.isDown = false;
+      d.selectedIndex = null;
+    }
+
+    function exportJson() {
+      const data = getCurrentPracticeData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      const safeTitle = (data.title || 'practice').replace(/[^a-z0-9]+/gi, '_').replace(/^_|_$/g, '');
+      a.download = `${safeTitle || 'practice'}_${data.date || todayString()}.json`;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    }
+
+    function exportPng() {
+      redrawCanvas();
+      const a = document.createElement('a');
+      a.href = els.canvas.toDataURL('image/png');
+      a.download = `lacrosse_sketch_${els.practiceDate.value || todayString()}.png`;
+      a.click();
+    }
+
+    function importJsonFile(file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const data = JSON.parse(e.target.result);
+          if (!data || typeof data !== 'object') throw new Error('Invalid file');
+          if (!data.id) data.id = uid();
+          state.practices.unshift(data);
+          saveStore();
+          renderPracticeList();
+          loadPractice(data);
+          alert('Practice imported.');
+        } catch (err) {
+          alert('Could not import JSON file.');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function bindEvents() {
+      els.addBlockBtn.addEventListener('click', () => addBlock());
+      els.addTemplateBtn.addEventListener('click', addTemplateBlocks);
+      els.clearBlocksBtn.addEventListener('click', () => {
+        if (!state.blocks.length) return;
+        if (confirm('Clear all practice blocks?')) {
+          state.blocks = [];
+          renderBlocks();
+          renderSummary();
+        }
+      });
+      els.newPracticeBtn.addEventListener('click', newPractice);
+      els.savePracticeBtn.addEventListener('click', savePractice);
+      els.duplicatePracticeBtn.addEventListener('click', duplicatePractice);
+      els.printBtn.addEventListener('click', () => window.print());
+      els.exportBtn.addEventListener('click', exportJson);
+      els.exportPngBtn.addEventListener('click', exportPng);
+      els.importBtn.addEventListener('click', () => els.importFile.click());
+      els.importFile.addEventListener('change', (e) => {
+        const file = e.target.files?.[0];
+        if (file) importJsonFile(file);
+        e.target.value = '';
+      });
+      els.searchPractices.addEventListener('input', renderPracticeList);
+      els.practiceLength.addEventListener('input', renderSummary);
+
+      document.querySelectorAll('.tool-btn').forEach(btn => {
+        btn.addEventListener('click', () => setActiveTool(btn.dataset.tool));
+      });
+      els.drawColor.addEventListener('input', () => state.drawing.color = els.drawColor.value);
+      els.drawWidth.addEventListener('input', () => state.drawing.width = Number(els.drawWidth.value || 3));
+      els.canvasBgMode.addEventListener('change', () => {
+        state.drawing.bgMode = els.canvasBgMode.value;
+        redrawCanvas();
+      });
+      els.undoBtn.addEventListener('click', () => {
+        state.drawing.objects.pop();
+        redrawCanvas();
+      });
+      els.clearCanvasBtn.addEventListener('click', () => {
+        if (confirm('Clear the sketch?')) {
+          state.drawing.objects = [];
+          redrawCanvas();
+        }
+      });
+
+      ['mousedown', 'touchstart'].forEach(evt => els.canvas.addEventListener(evt, onCanvasDown, { passive: false }));
+      ['mousemove', 'touchmove'].forEach(evt => els.canvas.addEventListener(evt, onCanvasMove, { passive: false }));
+      ['mouseup', 'mouseleave', 'touchend'].forEach(evt => els.canvas.addEventListener(evt, onCanvasUp, { passive: false }));
+    }
+
+    function init() {
+      bindEvents();
+      loadStore();
+      newPractice();
+      setActiveTool('line');
+      state.drawing.color = els.drawColor.value;
+      state.drawing.width = Number(els.drawWidth.value || 3);
+      redrawCanvas();
+    }
+
+    init();
+  </script>
+</body>
+</html>
